@@ -24,5 +24,5 @@ sbatch \
 
 
 #once dada2 has finished, download files from cluster to local computer (type this into a local terminal)
-scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/SBCSS/fastqs/SBCSS/PR_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop/SBCSS
-scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/SBCSS/fastqs/SBCSS/PR_taxa.txt /home/mobaxterm/Desktop/SBCSS
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/SBCSS/fastqs/PR/PR_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/SBCSS/fastqs/PR/PR_taxa.txt /home/mobaxterm/Desktop
