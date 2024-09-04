@@ -10,14 +10,14 @@ meta <- read.csv("SBCSS_metadata.csv", header=TRUE,sep=",",row.names=1)
 ASV <- ASV_nochl.mit.euk[,1:(ncol(ASV_nochl.mit.euk)-7)]
 rarecurve(tASV, step = 1000, col = "blue", label=F, xlim=c(0,20000))
 
-#rarefy samples to 13000
+#rarefy samples to 11000
 OTU <- otu_table(ASV, taxa_are_rows = T)
 TAX <- tax_table(TAX_nochl.mit.euk)
 MET <- sample_data(meta)
 phy <- phyloseq(OTU,TAX,MET)
 
 set.seed(8800)
-rar <- rarefy_even_depth(phy, sample.size = 13000)
+rar <- rarefy_even_depth(phy, sample.size = 11000)
 ASV_rar <- rar@otu_table
 TAX_rar <- rar@tax_table
 MET_rar <- rar@sam_data
@@ -25,8 +25,8 @@ MET_rar <- rar@sam_data
 #calculate relative abundance
 ASV_rar_prop <- apply(ASV_rar, 2, function(x) x/sum(x)*100)
 
-#remove singletons (1/13000*100=0.0077%)
-single <- rowSums(ASV_rar_prop[,1:ncol(ASV_rar_prop)]) > 0.0077
+#remove singletons (1/11000*100=0.0091%)
+single <- rowSums(ASV_rar_prop[,1:ncol(ASV_rar_prop)]) > 0.0091
 ASV_NoSingle <- as.data.frame(ASV_rar_prop[single,])
 
 #Remove singletons from rarefied taxonomy file
