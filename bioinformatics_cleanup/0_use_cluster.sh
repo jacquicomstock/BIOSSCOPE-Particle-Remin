@@ -1,3 +1,6 @@
+#upload fastq files
+scp /home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/AE2408_01-434104849/FASTQ_Generation_2024-10-07_18_28_02Z-778256556/ carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2
+
 #SSH for the carlsonlab shared cluster and type in the password
 ssh carlsonlab@pod.cnsi.ucsb.edu
 
