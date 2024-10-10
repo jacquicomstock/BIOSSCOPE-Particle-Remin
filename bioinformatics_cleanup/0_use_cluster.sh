@@ -1,11 +1,12 @@
 #fastq files downloaded from illumina have fastqs for each sample in individual files. First stepis to move all the fastqs to one folder
-destination="/home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/"
-source="/home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/AE2408_01-434104849/FASTQ_Generation_2024-10-07_18_28_02Z-778256556/"
+destination="/home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/redemultiplexed"
+source="/home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE\AE2408/AE2408_Fastqs/redemultiplexed/AE2408_02-434419108/FASTQ_Generation_2024-10-10_14_55_02Z-778616183/"
 
 # Loop through each folder in the source directory
 for folder in "$source"*/; do
     # Move all files from the current folder to the destination
     mv "$folder"* "$destination"
+done
 
 #upload files to local cluster
 scp /home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/JCCC091924* user@remote.cluster.address:/home/user/target_directory/ carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2
