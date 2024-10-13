@@ -9,7 +9,7 @@ for folder in "$source"*/; do
 done
 
 #upload files to local cluster
-scp /home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/JCCC091924* user@remote.cluster.address:/home/user/target_directory/ carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2
+scp /home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/JCCC091924* carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2
 
 #SSH for the carlsonlab shared cluster and type in the password
 ssh carlsonlab@pod.cnsi.ucsb.edu
@@ -19,6 +19,9 @@ cd PR
 
 #create .R file
 nano dada2_PR.R
+
+#move files into separate folders for separate jobs
+mv /home/carlsonlab/PR2/JCCC091924-PC* /home/carlsonlab/PR2/AE2408_pump/
 
 #activate conda environment with R
 conda activate R4.2.0
