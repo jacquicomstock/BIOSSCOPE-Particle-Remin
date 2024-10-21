@@ -28,17 +28,59 @@ conda activate R4.2.0
 
 #queue a job in slurm using sbatch
 sbatch \
-	--job-name=PR \
+	--job-name=PR2v4 \
 	--nodes=1 \
 	--tasks-per-node=32 \
 	--cpus-per-task=1 \
 	--mem=32G \
 	--time=5:00:00 \
-	-o dada2_out \
-	-e dada2_err \
-	--wrap="Rscript dada2_PR.R /home/carlsonlab/SBCSS/fastqs/PR"
+	-o dada2_outv4 \
+	-e dada2_errv4 \
+	--wrap="Rscript dada2_PR2.R /home/carlsonlab/PR2"
+
+ sbatch \
+	--job-name=AE2408_pumpv6 \
+	--nodes=1 \
+	--tasks-per-node=32 \
+	--cpus-per-task=1 \
+	--mem=32G \
+	--time=5:00:00 \
+	-o dada2_outv6 \
+	-e dada2_errv6 \
+	--wrap="Rscript dada2_AE2408pump.R /home/carlsonlab/PR2/AE2408"
+
+  sbatch \
+	--job-name=NBv3 \
+	--nodes=1 \
+	--tasks-per-node=32 \
+	--cpus-per-task=1 \
+	--mem=32G \
+	--time=3:00:00 \
+	-o dada2_outv3 \
+	-e dada2_errv3 \
+	--wrap="Rscript dada2_NB.R /home/carlsonlab/PR2/NB_fastq"
+
+   sbatch \
+	--job-name=MNv4 \
+	--nodes=1 \
+	--tasks-per-node=32 \
+	--cpus-per-task=1 \
+	--mem=32G \
+	--time=1:00:00 \
+	-o dada2_outv4 \
+	-e dada2_errv4 \
+	--wrap="Rscript dada2_MN.R /home/carlsonlab/PR2/mock_neg"
 
 
 #once dada2 has finished, download files from cluster to local computer (type this into a local terminal)
-scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/SBCSS/fastqs/PR/PR_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
-scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/SBCSS/fastqs/PR/PR_taxa.txt /home/mobaxterm/Desktop
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/PR2_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/PR2_taxa.txt /home/mobaxterm/Desktop
+
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/AE2408_pump/AE2408pump_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/AE2408_pump/AE2408pump_taxa.txt /home/mobaxterm/Desktop
+
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/NB_fastq/NB_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/NB_fastq/NB_taxa.txt /home/mobaxterm/Desktop
+
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/mock_neg/PRmockneg_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/mock_neg/PRmockneg_taxa.txt /home/mobaxterm/Desktop
