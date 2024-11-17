@@ -26,6 +26,7 @@ cp dada2_PR2.R /home/carlsonlab/BIOS_Frac/all_fastq
 
 #move files into separate folders for separate jobs
 mv /home/carlsonlab/PR2/JCCC091924-PC* /home/carlsonlab/PR2/AE2408_pump/
+mv /home/carlsonlab/PR2/AE2408_pump/JCCC091924-PC* /home/carlsonlab/BIOS_Frac/all_fastq/
 
 #activate conda environment with R
 conda activate R4.2.0
@@ -74,6 +75,17 @@ sbatch \
 	-o dada2_outv4 \
 	-e dada2_errv4 \
 	--wrap="Rscript dada2_MN.R /home/carlsonlab/PR2/mock_neg"
+
+    sbatch \
+	--job-name=PUMPv1 \
+	--nodes=1 \
+	--tasks-per-node=32 \
+	--cpus-per-task=1 \
+	--mem=32G \
+	--time=10:00:00 \
+	-o dada2_outv1 \
+	-e dada2_errv1 \
+	--wrap="Rscript dada2_PUMP.R /home/carlsonlab/BIOS_Frac/all_fastq"
 
 
 #once dada2 has finished, download files from cluster to local computer (type this into a local terminal)
