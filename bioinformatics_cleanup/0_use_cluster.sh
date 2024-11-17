@@ -10,6 +10,7 @@ done
 
 #upload files to local cluster
 scp /home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/AE2408/AE2408_Fastqs/JCCC091924* carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2
+scp /home/mobaxterm/Desktop/Research/Projects/BIOSSCOPE/Pump_Size_Fraction_BIOSSCOPE/BIOSSCOPE_Pump_ASV_data/BIOS_Frac_Fastq/BIOSSCOPE _Size_Frac_fastq carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/BIOS_Frac/all_fastq
 
 #SSH for the carlsonlab shared cluster and type in the password
 ssh carlsonlab@pod.cnsi.ucsb.edu
@@ -19,6 +20,9 @@ cd PR
 
 #create .R file
 nano dada2_PR.R
+
+#if a file already exists, copy & paste a copy of the file into the new directory
+cp dada2_PR2.R /home/carlsonlab/BIOS_Frac/all_fastq
 
 #move files into separate folders for separate jobs
 mv /home/carlsonlab/PR2/JCCC091924-PC* /home/carlsonlab/PR2/AE2408_pump/
