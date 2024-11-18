@@ -100,3 +100,6 @@ scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/NB_fastq/NB_taxa.txt /home
 
 scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/mock_neg/PRmockneg_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
 scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/PR2/mock_neg/PRmockneg_taxa.txt /home/mobaxterm/Desktop
+
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/BIOS_Frac/all_fastq/PUMP_seqtab-nochimtaxa.txt /home/mobaxterm/Desktop
+scp carlsonlab@pod.cnsi.ucsb.edu:/home/carlsonlab/BIOS_Frac/all_fastq/PUMP_taxa.txt /home/mobaxterm/Desktop
