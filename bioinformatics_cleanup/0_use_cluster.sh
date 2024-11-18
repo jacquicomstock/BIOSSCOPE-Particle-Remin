@@ -77,14 +77,14 @@ sbatch \
 	--wrap="Rscript dada2_MN.R /home/carlsonlab/PR2/mock_neg"
 
     sbatch \
-	--job-name=PUMPv1 \
+	--job-name=PUMPv3 \
 	--nodes=1 \
 	--tasks-per-node=32 \
 	--cpus-per-task=1 \
-	--mem=32G \
-	--time=10:00:00 \
-	-o dada2_outv1 \
-	-e dada2_errv1 \
+	--mem=64G \
+	--time=24:00:00 \
+	-o dada2_outv3 \
+	-e dada2_errv3 \
 	--wrap="Rscript dada2_PUMP.R /home/carlsonlab/BIOS_Frac/all_fastq"
 
 
