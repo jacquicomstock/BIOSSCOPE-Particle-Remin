@@ -1,0 +1,115 @@
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --------------------------
+# 1) Load data
+# --------------------------
+file_path = "Carb_RA_PR_PR2_Pump_trimmed.csv"
+df = pd.read_csv(file_path)
+
+# --------------------------
+# 2) Filter to PR cruise
+# --------------------------
+df_pr = df[df["Experiment_Cruise"] == "PR"].copy()
+
+# Last 9 columns are carbohydrates (as you specified)
+carb_cols = df_pr.columns[-9:].tolist()
+
+# --------------------------
+# 3) Aggregate + normalize
+# --------------------------
+# Mean composition per Water_Treatment x Timepoint
+df_grouped = (
+    df_pr
+    .groupby(["Water_Treatment", "Timepoint"], as_index=False)[carb_cols]
+    .mean()
+)
+
+# Order timepoints
+df_grouped["Timepoint"] = pd.Categorical(
+    df_grouped["Timepoint"], categories=["T0", "TF"], ordered=True
+)
+
+# Strict normalization to 100% per bar (sum to 1.0)
+row_sums = df_grouped[carb_cols].sum(axis=1)
+df_grouped.loc[row_sums > 0, carb_cols] = df_grouped.loc[row_sums > 0, carb_cols].div(row_sums[row_sums > 0], axis=0)
+
+# Order Water_Treatment
+treatment_order = ["UE_EP", "M_EP", "UE_MP", "M_MP"]
+df_grouped["Water_Treatment"] = pd.Categorical(
+    df_grouped["Water_Treatment"], categories=treatment_order, ordered=True
+)
+df_grouped = df_grouped.sort_values(["Water_Treatment", "Timepoint"])
+
+# --------------------------
+# 4) Plot settings
+# --------------------------
+# Your palette (9 colors for 9 carbohydrates)
+custom_palette = [
+    "#335c67",
+    "#99a88c",
+    "#fff3b0",
+    "#f0c977",
+    "#e09f3e",
+    "#bf6535",
+    "#9e2a2b",
+    "#791b1d",
+    "#540b0e"
+]
+
+# Bar geometry
+treatments = treatment_order
+x = np.arange(len(treatments))
+bar_width = 0.35
+
+# --------------------------
+# 5) Make plot
+# --------------------------
+fig, ax = plt.subplots(figsize=(6, 4))
+
+for tp_index, timepoint in enumerate(["T0", "TF"]):
+    subset = df_grouped[df_grouped["Timepoint"] == timepoint]
+    bottoms = np.zeros(len(treatments))
+
+    for i, carb in enumerate(carb_cols):
+        values = []
+        for tr in treatments:
+            s = subset.loc[subset["Water_Treatment"] == tr, carb]
+            values.append(float(s.values[0]) if len(s) else 0.0)
+
+        ax.bar(
+            x + (tp_index - 0.5) * bar_width,
+            values,
+            bar_width,
+            bottom=bottoms,
+            color=custom_palette[i],
+            edgecolor=(0, 0, 0, 0.6),   # black, semi-transparent (stays black in PDF)
+            linewidth=0.35,
+            label=carb if tp_index == 0 else ""  # add legend labels only once
+        )
+        bottoms += np.array(values)
+
+# Minimalist styling (multi-panel friendly)
+ax.set_xticks(x)
+ax.set_xticklabels(treatments, fontsize=10)
+ax.set_ylabel("Relative Abundance", fontsize=11)
+ax.set_ylim(0, 1)
+
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.tick_params(axis="both", which="major", labelsize=9)
+
+ax.legend(frameon=False, bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=8)
+
+plt.tight_layout()
+
+# --------------------------
+# 6) Export as high-quality vector PDF
+# --------------------------
+out_pdf = "Carbohydrate_Composition_PR_minimalist_v2.pdf"
+plt.savefig(out_pdf, format="pdf", bbox_inches="tight")
+plt.close()
+
+print(f"Saved: {out_pdf}")
