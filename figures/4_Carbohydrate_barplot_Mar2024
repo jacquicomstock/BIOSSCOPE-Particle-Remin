@@ -5,59 +5,56 @@ import matplotlib.pyplot as plt
 # --------------------------
 # 1) Load data
 # --------------------------
-file_path = "Carb_RA_PR_PR2_Pump_trimmed.csv" 
+file_path = "Neutral_Carb_RA_PR_PR2_Pump_20260305.csv"
 df = pd.read_csv(file_path)
 
 # --------------------------
-# 2) Filter to PR2 + remove excluded samples
+# 2) Filter PR2 + remove Control
 # --------------------------
-df_sub = df[df["Experiment_Cruise"] == "PR2"].copy()
+df_pr2 = df[
+    (df["cruise"] == "PR2") &
+    (df["Treatment"] != "Control")
+].copy()
 
-# Remove Water Depth == "Meso Filtered"
-# (Assumes the column name is exactly "Water Depth")
-df_sub = df_sub[df_sub["Water Depth"] != "Meso Filtered"]
+# Carbohydrate columns (9)
+carb_cols = [
+    "Fucose", "Rhamnose", "Galactosamine", "Arabinose", "Glucosamine",
+    "Galactose", "Glucose", "MannoseXylose", "Ribose"
+]
 
-# Remove Control treatment
-# (Assumes the column name is exactly "Water_Treatment")
-df_sub = df_sub[df_sub["Water_Treatment"] != "Control"]
-
-# --------------------------
-# 3) Identify carbohydrate columns (last 9 columns)
-# --------------------------
-carb_cols = df_sub.columns[-9:].tolist()
+# Ensure numeric
+for c in carb_cols:
+    df_pr2[c] = pd.to_numeric(df_pr2[c], errors="coerce")
 
 # --------------------------
-# 4) Aggregate + normalize
+# 3) Aggregate + normalize
 # --------------------------
-# Mean composition per Water_Treatment x Timepoint
 df_grouped = (
-    df_sub
+    df_pr2
     .groupby(["Water_Treatment", "Timepoint"], as_index=False)[carb_cols]
     .mean()
 )
 
-# Order timepoints
-df_grouped["Timepoint"] = pd.Categorical(
-    df_grouped["Timepoint"], categories=["T0", "TF"], ordered=True
-)
-
-# Strict normalization to 100% per bar (sum to 1.0)
+# Normalize each bar to sum to 1
 row_sums = df_grouped[carb_cols].sum(axis=1)
 df_grouped.loc[row_sums > 0, carb_cols] = df_grouped.loc[row_sums > 0, carb_cols].div(
     row_sums[row_sums > 0], axis=0
 )
 
-# Match the same treatment ordering used previously (drops any that aren’t present)
-treatment_order = ["UE_EP", "M_EP", "UE_MP", "M_MP"]
-present = [t for t in treatment_order if t in df_grouped["Water_Treatment"].unique()]
+# Enforce y-axis order (TOP -> BOTTOM after invert_yaxis)
+treatment_order = ["UE SP", "M SP", "UE DP", "M DP"]
+df_grouped = df_grouped[df_grouped["Water_Treatment"].isin(treatment_order)].copy()
 
 df_grouped["Water_Treatment"] = pd.Categorical(
-    df_grouped["Water_Treatment"], categories=present, ordered=True
+    df_grouped["Water_Treatment"],
+    categories=treatment_order,
+    ordered=True
 )
+
 df_grouped = df_grouped.sort_values(["Water_Treatment", "Timepoint"])
 
 # --------------------------
-# 5) Colors (exact palette)
+# 4) Plot settings
 # --------------------------
 custom_palette = [
     "#335c67",
@@ -71,56 +68,65 @@ custom_palette = [
     "#540b0e"
 ]
 
+y = np.arange(len(treatment_order))
+bar_h = 0.35
+
 # --------------------------
-# 6) Plot
+# 5) Plot (horizontal stacked bars)
+#    T0 ABOVE TF within each treatment
 # --------------------------
-treatments = present
-x = np.arange(len(treatments))
-bar_width = 0.35
+fig, ax = plt.subplots(figsize=(7, 5))
 
-fig, ax = plt.subplots(figsize=(6, 4))
+for tp in ["T0", "TF"]:
+    subset = df_grouped[df_grouped["Timepoint"] == tp]
+    left = np.zeros(len(treatment_order))
 
-for tp_index, timepoint in enumerate(["T0", "TF"]):
-    subset = df_grouped[df_grouped["Timepoint"] == timepoint]
-    bottoms = np.zeros(len(treatments))
+    # T0 above TF (before invert_yaxis)
+    ypos = y - bar_h/2 if tp == "T0" else y + bar_h/2
 
-    for i, carb in enumerate(carb_cols):
-        values = []
-        for tr in treatments:
+    for j, carb in enumerate(carb_cols):
+        vals = []
+        for tr in treatment_order:
             s = subset.loc[subset["Water_Treatment"] == tr, carb]
-            values.append(float(s.values[0]) if len(s) else 0.0)
+            vals.append(float(s.values[0]) if len(s) else 0.0)
 
-        ax.bar(
-            x + (tp_index - 0.5) * bar_width,
-            values,
-            bar_width,
-            bottom=bottoms,
-            color=custom_palette[i],
-            linewidth=0,       # no borders
-            edgecolor=None
+        ax.barh(
+            ypos,
+            vals,
+            height=bar_h,
+            left=left,
+            color=custom_palette[j],
+            edgecolor="black",
+            linewidth=0.7,
+            label=carb if tp == "T0" else None  # legend once
         )
-        bottoms += np.array(values)
+        left += np.array(vals)
+
+# Axis labels/limits
+ax.set_yticks(y)
+ax.set_yticklabels(treatment_order)
+ax.set_xlim(0, 1)
+ax.set_xlabel("Relative Abundance")
+
+# Put UE SP at top and M DP at bottom
+ax.invert_yaxis()
+
+# Square plotting area (legend excluded)
+ax.set_box_aspect(1)
 
 # Minimalist styling
-ax.set_xticks(x)
-ax.set_xticklabels(treatments, fontsize=10)
-ax.set_ylabel("Relative Abundance", fontsize=11)
-ax.set_ylim(0, 1)
-
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-ax.tick_params(axis="both", which="major", labelsize=9)
 
-# NOTE: Legend omitted in the exported PDF to match the exact file I generated.
-# If you want the legend back, uncomment the block below:
-# ax.legend(frameon=False, bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=8)
+# Legend outside
+ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", frameon=False)
 
 plt.tight_layout()
 
 # --------------------------
-# 7) Export high-quality vector PDF
+# 6) Export
 # --------------------------
-out_pdf = "Carbohydrate_Composition_PR2_minimalist_high_quality.pdf"
+out_pdf = "PR2_carbohydrate_stacked_barplot_T0_above_TF_final.pdf"
 plt.savefig(out_pdf, format="pdf", bbox_inches="tight")
 plt.close()
 
