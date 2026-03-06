@@ -1,0 +1,46 @@
+library(dplyr)
+library(readr)
+library(purrr)
+
+# file paths
+pr_file  <- "PR_ASV_nocyano_mergeready.csv"
+pr2_file <- "PR2_ASV_nocyano_mergeready.csv"
+pr3_file <- "PR3_ASVabund_NoCyano_mergeready.csv"
+
+# function to read and standardize ASV column name
+read_asv_table <- function(file) {
+  df <- read_csv(file, show_col_types = FALSE)
+  
+  # rename first column to ASV if needed
+  names(df)[1] <- "ASV"
+  
+  # make sure duplicate ASVs within a file are summed
+  df <- df %>%
+    group_by(ASV) %>%
+    summarise(across(everything(), ~ sum(.x, na.rm = TRUE)), .groups = "drop")
+  
+  return(df)
+}
+
+# read files
+pr  <- read_asv_table(pr_file)
+pr2 <- read_asv_table(pr2_file)
+pr3 <- read_asv_table(pr3_file)
+
+# merge all by ASV
+merged_asv <- list(pr, pr2, pr3) %>%
+  reduce(full_join, by = "ASV") %>%
+  mutate(across(-ASV, ~ replace_na(.x, 0)))
+
+merged_asv_mat <- merged_asv %>%
+  as.data.frame()
+
+rownames(merged_asv_mat) <- merged_asv_mat$ASV
+merged_asv_mat$ASV <- NULL
+
+# inspect
+dim(merged_asv_mat)
+head(merged_asv_mat[, 1:10])
+
+# save merged table
+write_csv(merged_asv_mat, "merged_PR_PR2_PR3_ASV_table.csv")
