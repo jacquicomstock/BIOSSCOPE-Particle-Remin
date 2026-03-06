@@ -1,11 +1,14 @@
+Merge separate dada2 files
+```{r}
 library(dplyr)
 library(readr)
 library(purrr)
+library(tidyr)
 
 # file paths
-pr_file  <- "PR_ASV_nocyano_mergeready.csv"
-pr2_file <- "PR2_ASV_nocyano_mergeready.csv"
-pr3_file <- "PR3_ASVabund_NoCyano_mergeready.csv"
+pr_file  <- "C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/PR_ASV_nocyano_mergeready.csv"
+pr2_file <- "C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/PR2_ASV_nocyano_mergeready.csv"
+pr3_file <- "C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/PR3_ASVabund_NoCyano_mergeready.csv"
 
 # function to read and standardize ASV column name
 read_asv_table <- function(file) {
@@ -32,15 +35,52 @@ merged_asv <- list(pr, pr2, pr3) %>%
   reduce(full_join, by = "ASV") %>%
   mutate(across(-ASV, ~ replace_na(.x, 0)))
 
-merged_asv_mat <- merged_asv %>%
-  as.data.frame()
-
-rownames(merged_asv_mat) <- merged_asv_mat$ASV
-merged_asv_mat$ASV <- NULL
 
 # inspect
-dim(merged_asv_mat)
-head(merged_asv_mat[, 1:10])
+dim(merged_asv)
+head(merged_asv[, 1:10])
 
 # save merged table
-write_csv(merged_asv_mat, "merged_PR_PR2_PR3_ASV_table.csv")
+write_csv(merged_asv, "C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/merged_PR_PR2_PR3_ASV_table.csv")
+```
+
+
+Merge taxa files
+```{r}
+library(dplyr)
+library(readr)
+
+pr_tax  <- read_csv("C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/PR_taxa_rar11000_NoSingle_nocyano_mergeready.csv", show_col_types = FALSE)
+pr2_tax <- read_csv("C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/PR2_taxa_nocyano_mergeready.csv", show_col_types = FALSE)
+pr3_tax <- read_csv("C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/PR3_taxa_rar_NoCyano_mergeready.csv", show_col_types = FALSE)
+
+names(pr_tax)[1]  <- "ASV"
+names(pr2_tax)[1] <- "ASV"
+names(pr3_tax)[1] <- "ASV"
+
+merged_taxa <- bind_rows(pr_tax, pr2_tax, pr3_tax) %>%
+  distinct(ASV, .keep_all = TRUE)
+
+write_csv(merged_taxa, "C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/merged_PR_PR2_PR3_taxa.csv")
+```
+
+Merge taxa and ASV files
+```{r}
+library(dplyr)
+library(readr)
+
+# read merged files
+merged_asv  <- read_csv("C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/merged_PR_PR2_PR3_ASV_table.csv", show_col_types = FALSE)
+merged_taxa <- read_csv("C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/merged_PR_PR2_PR3_taxa.csv", show_col_types = FALSE)
+
+# make sure first column is named ASV in both files
+names(merged_asv)[1]  <- "ASV"
+names(merged_taxa)[1] <- "ASV"
+
+# merge by ASV, keeping all ASVs from the abundance table
+asv_tax_merged <- merged_asv %>%
+  left_join(merged_taxa, by = "ASV")
+
+# save
+write_csv(asv_tax_merged, "C:/Users/jacqu/Desktop/Research/Projects/BIOSSCOPE/Particle_Experiments/Joined_Files/16S/merged_PR_PR2_PR3_ASV_taxa.csv")
+```
